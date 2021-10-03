@@ -1,0 +1,72 @@
+version: '3.5'
+
+volumes:
+  database-data:
+  redis-data:
+
+services:
+  hub:
+    image: selenium/hub
+    ports:
+      - "4444:4444"
+    environment:
+      GRID_MAX_SESSION: 16
+      GRID_BROWSER_TIMEOUT: 3000
+      GRID_TIMEOUT: 3000
+  browser:
+    dns:
+      - 94.140.14.15
+      - 94.140.15.16
+    image: selenium/node-chrome-debug
+    depends_on:
+      - hub
+    environment:
+      HUB_PORT_4444_TCP_ADDR: hub
+      HUB_PORT_4444_TCP_PORT: 4444
+      NODE_MAX_SESSION: 16
+      NODE_MAX_INSTANCES: 16
+    volumes:
+      - /dev/shm:/dev/shm
+    ports:
+      - "9001:5900"
+    links:
+      - hub
+  postgres:
+    image: postgres:10
+    ports:
+      - 19371:5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      PGDATA: /data
+    volumes:
+      - database-data:/data
+  redis:
+    image: redis:4.0.10
+    ports:
+      - 7779:6379
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   user: "104"
+  #   ports:
+  #     - 9002:3000
+  #   # volumes:
+  #   #   - .docker/grafana:/var/lib/grafana
+  #   links:
+  #     - postgres
+  #     - redis
+  # analitics:
+  #   image: posthog/posthog:latest
+  #   ports:
+  #     - 8000:8000
+  #   environment:
+  #     DATABASE_URL: postgres://postgres:postgres@postgres:5432/posthog
+  #     IS_DOCKER: 'true'
+  #     REDIS_URL: redis://redis:6379/
+  #     SECRET_KEY: secret
+  #     DISABLE_SECURE_SSL_REDIRECT: 'true'
+  #   depends_on:
+  #     - postgres
+  #     - redis
+
+  

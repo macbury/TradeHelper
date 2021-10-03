@@ -1,0 +1,1 @@
+# https://www.vaneck.com/uk/en/etf/equity/gdx/overview/
